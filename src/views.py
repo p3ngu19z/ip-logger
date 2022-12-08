@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from src.models import Click, URL, db
 from src.forms import URLCreateForm, URLEditForm
-from src.utils import raw_data_from_request
+from src.utils import raw_data_from_request, get_client_ip_address_from_request
 
 main = Blueprint('main', __name__, url_prefix='/')
 
@@ -42,7 +42,8 @@ def logger_view(path):
     if click_uuid:
         click = db.one_or_404(db.select(Click).filter_by(uuid=click_uuid))
     else:
-        click = Click(ip_address=request.remote_addr, url=url_obj, raw_data=raw_data_from_request(request))
+        click = Click(ip_address=get_client_ip_address_from_request(request), url=url_obj,
+                      raw_data=raw_data_from_request(request))
         db.session.add(click)
         db.session.commit()
 

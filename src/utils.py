@@ -11,13 +11,17 @@ def generate_random_name() -> str:
     return result
 
 
+def get_client_ip_address_from_request(r) -> str:
+    return str(r.access_route[0])
+
+
 def raw_data_from_request(r) -> dict:
     result = {
         "user_agent": str(r.user_agent),
         "referrer_url": str(r.referrer),
         "headers": dict(r.headers),
-        "access_route": " -> ".join(str(x) for x in r.access_route),
-        "ip_info": get_ip_info_from_geolocationdb(r.remote_addr),
+        "access_route": ", ".join(str(x) for x in r.access_route),
+        "ip_info": get_ip_info_from_geolocationdb(get_client_ip_address_from_request(r)),
         "browser_info": user_agent_parser.Parse(str(r.user_agent)),
     }
     return result
