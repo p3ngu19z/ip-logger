@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+    <div class="container">
+        <form class="row g-3 justify-content-md-center mt-5" method="post">
+            {{ form.csrf_token }}
+            <div class="col-12 col-md-9">
+                <input type="url" class="form-control" id="exampleInputPassword1" name="url"
+                       placeholder="https://google.com">
+            </div>
+            <div class="col-12 col-md-3 d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-block">Create</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

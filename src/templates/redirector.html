@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+</head>
+<body>
+</body>
+<noscript>
+    <meta http-equiv="refresh" content="0; url={{ url.name }}?c={{ click_uuid }}&nj=true"/>
+</noscript>
+<script>
+    async function GetFP() {
+        try {
+            const fpPromise = import('{{ url_for('static', filename='js/f.js') }}')
+                .then(FingerprintJS => FingerprintJS.load())
+            let fp = await fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    return result.visitorId
+                })
+            return fp
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // Initialize the agent at application startup.
+
+    async function SendData() {
+        try {
+            var fp = await GetFP();
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{{ url.name }}?c={{ click_uuid }}", false);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+                "fingerprint": fp
+            }));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    async function Main() {
+        await SendData();
+        window.location.replace("{{url.url_to}}");
+    }
+
+    Main();
+
+
+</script>
+</html>
