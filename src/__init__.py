@@ -16,4 +16,7 @@ def create_app():
     from src.utils import to_pretty_json
     app.jinja_env.filters['tojson_pretty'] = to_pretty_json
 
+    with app.app_context():
+        db.create_all()
+
     return app

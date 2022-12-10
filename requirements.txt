@@ -11,3 +11,4 @@ psycopg2-binary
 flask_httpauth
 flask_wtf
 wtforms-alchemy
+pytest
