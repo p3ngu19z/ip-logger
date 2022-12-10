@@ -1,4 +1,4 @@
-from src.models import URL, db
+from tests.conftest import EXAMPLE_URL
 
 
 def test_create_page(client, auth_headers):
@@ -8,53 +8,28 @@ def test_create_page(client, auth_headers):
 
 def test_create_url(client, auth_headers):
     response = client.post("/c", headers=auth_headers, data={
-        "url": "https://example.com/"
+        "url": EXAMPLE_URL
     })
     assert response.status_code == 302
 
 
-def test_dashboard_page(app, client, auth_headers):
-    with app.app_context():
-        url_obj = URL(url_to="https://example.com")
-        db.session.add(url_obj)
-        db.session.commit()
+def test_dashboard_page(app, client, url_obj, auth_headers):
+    response = client.get(f"/d/{url_obj.uuid}", headers=auth_headers)
 
-        response = client.get(f"/d/{url_obj.uuid}", headers=auth_headers)
-
-        assert response.status_code == 200
-
-        db.session.delete(url_obj)
-        db.session.commit()
+    assert response.status_code == 200
 
 
-def test_dashboard_edit(app, client, auth_headers):
-    with app.app_context():
-        url_obj = URL(url_to="https://example.com")
-        db.session.add(url_obj)
-        db.session.commit()
+def test_dashboard_edit(app, client, url_obj, auth_headers):
+    response = client.post(f"/d/{url_obj.uuid}", headers=auth_headers, data={
+        "url_to": EXAMPLE_URL,
+        "name": "test",
+        "use_js": False
+    })
 
-        response = client.post(f"/d/{url_obj.uuid}", headers=auth_headers, data={
-            "url_to": "https://example.com",
-            "name": "test",
-            "use_js": False
-        })
-
-        assert response.status_code == 200
-
-        db.session.delete(url_obj)
-        db.session.commit()
+    assert response.status_code == 200
 
 
-def test_redirector(app, client):
-    with app.app_context():
-        url_obj = URL(url_to="https://example.com")
-        db.session.add(url_obj)
-        db.session.commit()
-
-        response = client.get(f"/{url_obj.name}")
-
-        assert response.status_code == 302
-        assert response.location == "https://example.com"
-
-        db.session.delete(url_obj)
-        db.session.commit()
+def test_redirector(app, client, url_obj):
+    response = client.get(f"/{url_obj.name}")
+    assert response.status_code == 302
+    assert response.location == EXAMPLE_URL
