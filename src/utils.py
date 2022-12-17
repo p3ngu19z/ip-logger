@@ -37,10 +37,12 @@ def get_client_ip_address_from_request(r) -> str:
 
 def raw_data_from_request(r) -> dict:
     result = {
-        "user_agent": str(r.user_agent),
-        "referrer_url": str(r.referrer),
-        "headers": dict(r.headers),
-        "access_route": ", ".join(str(x) for x in r.access_route),
+        "request_info": {
+            "user_agent": str(r.user_agent),
+            "referrer_url": str(r.referrer),
+            "access_route": ", ".join(str(x) for x in r.access_route),
+            "headers": dict(r.headers),
+        },
         "ip_info": get_ip_info(get_client_ip_address_from_request(r)),
         "browser_info": user_agent_parser.Parse(str(r.user_agent)),
     }
@@ -108,7 +110,7 @@ def get_hostname_from_ip(ip_address: str) -> str:
     return next(iter(socket.gethostbyaddr(ip_address)), "")
 
 
-def get_from_ip_info(ip_address: str) -> dict:
+def get_ip_info_from_ip_info(ip_address: str) -> dict:
     """
     :return:
      {

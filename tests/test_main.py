@@ -22,7 +22,7 @@ def test_dashboard_page(app, client, url_obj, auth_headers):
 def test_dashboard_edit(app, client, url_obj, auth_headers):
     response = client.post(f"/d/{url_obj.uuid}", headers=auth_headers, data={
         "url_to": EXAMPLE_URL,
-        "name": "test",
+        "path": "test",
         "use_js": False
     })
 
@@ -30,6 +30,6 @@ def test_dashboard_edit(app, client, url_obj, auth_headers):
 
 
 def test_redirector(app, client, url_obj):
-    response = client.get(f"/{url_obj.name}")
+    response = client.get(f"/{url_obj.path}")
     assert response.status_code == 302
     assert response.location == EXAMPLE_URL

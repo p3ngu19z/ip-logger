@@ -14,5 +14,5 @@ class URLCreateForm(FlaskForm):
 
 class URLEditForm(ModelForm):
     url_to = URLField(validators=[DataRequired()])
-    name = StringField(validators=[Unique(URL.name, get_session=db.session)])
+    path = StringField(validators=[Unique(URL.path, get_session=db.session)])
     use_js = BooleanField()

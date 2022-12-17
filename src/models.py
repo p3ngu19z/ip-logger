@@ -13,7 +13,7 @@ db = SQLAlchemy()
 class URL(db.Model):
     uuid = db.Column(UUIDType(), primary_key=True, default=uuid.uuid4)
     url_to = db.Column(URLType)
-    name = db.Column(db.String(), unique=True, default=generate_random_name)
+    path = db.Column(db.String(), unique=True, default=generate_random_name)
     use_js = db.Column(db.Boolean(), default=False)
 
 

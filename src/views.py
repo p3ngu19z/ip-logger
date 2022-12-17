@@ -35,7 +35,7 @@ def verify_password(username, password):
 
 @main.route('/<path:path>', methods=["GET", "POST"])
 def logger_view(path):
-    url_obj = db.one_or_404(db.select(URL).filter_by(name=path))
+    url_obj = db.one_or_404(db.select(URL).filter_by(path=path))
 
     # Load Click_UUID if exist
     click_uuid = request.args.get('c', None)
@@ -85,7 +85,7 @@ def dashboard_view(url_uuid):
     clicks = Click.query.filter_by(url_uuid=url_uuid).order_by(desc(Click.datetime)).all()
     if form.validate_on_submit():
         url.url_to = form.url_to.data
-        url.name = form.name.data
+        url.path = form.path.data
         url.use_js = form.use_js.data
         db.session.commit()
     return render_template("dashboard.html", clicks=clicks, url=url, form=form)
