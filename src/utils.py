@@ -107,7 +107,10 @@ def get_provider_from_ip(ip_address: str) -> str:
 
 
 def get_hostname_from_ip(ip_address: str) -> str:
-    return next(iter(socket.gethostbyaddr(ip_address)), "")
+    try:
+        return next(iter(socket.gethostbyaddr(ip_address)), "")
+    except Exception as e:
+        return f"Error: {e}"
 
 
 def get_ip_info_from_ip_info(ip_address: str) -> dict:
