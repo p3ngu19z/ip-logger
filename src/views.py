@@ -80,9 +80,12 @@ def logger_view(path):
 @main.route('/d/<url_uuid>', methods=["GET", "POST"])
 @auth.login_required
 def dashboard_view(url_uuid):
+    page = request.args.get("page", 1, int)
+    per_page = request.args.get("per_page", 10, int)
     url = db.one_or_404(db.select(URL).filter_by(uuid=url_uuid))
     form = URLEditForm(obj=url)
-    clicks = Click.query.filter_by(url_uuid=url_uuid).order_by(desc(Click.datetime)).all()
+    clicks = Click.query.filter_by(url_uuid=url_uuid).order_by(desc(Click.datetime)).paginate(page=page,
+                                                                                              per_page=per_page)
     if form.validate_on_submit():
         url.url_to = form.url_to.data
         url.path = form.path.data

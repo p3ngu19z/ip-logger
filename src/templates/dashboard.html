@@ -72,6 +72,29 @@
             {% endfor %}
             </tbody>
         </table>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
+                <li class="page-item {% if not clicks.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for(request.endpoint, url_uuid=url.uuid, page=clicks.prev_num) }}"
+                       tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                {% for page in clicks.iter_pages() %}
+                    {% if page %}
+                        {% if page != clicks.page %}
+                            <li class="page-item"><a class="page-link"
+                                                     href="{{ url_for(request.endpoint, url_uuid=url.uuid, page=page) }}">{{ page }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active"><span class="page-link">{{ page }}</span></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not clicks.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       href="{{ url_for(request.endpoint, url_uuid=url.uuid, page=clicks.next_num) }}">Next</a>
+                </li>
+            </ul>
+        </nav>
 
         {% for click in clicks %}
             <div class="modal fade" id="RawDataModal{{ click.uuid }}" tabindex="-1"
@@ -134,6 +157,16 @@
     function CopyShortURL() {
       navigator.clipboard.writeText("{{ request.host_url + url.path }}");
     }
+
+
+
+
+
+
+
+
+
+
 
     </script>
 {% endblock %}
