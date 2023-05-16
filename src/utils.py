@@ -1,8 +1,5 @@
-import dataclasses
-
 from flask import current_app
-from dataclasses import dataclass
-from typing import Optional
+import flask
 import random
 import string
 import json
@@ -13,27 +10,17 @@ from ipwhois import IPWhois
 from ua_parser import user_agent_parser
 
 
-@dataclass
-class IPInfo:
-    hostname: str
-    org: str
-    country_code: str
-    country_name: str
-    region: str
-    city: str
-    latitude: float
-    longitude: float
-    timezone: Optional[str] = str()
-
-
 def generate_random_name() -> str:
     result = ''.join(random.choices(string.ascii_lowercase, k=5))
     return result
 
 
-def get_client_ip_address_from_request(r) -> str:
-    return str(r.access_route[0])
-
+def get_client_ip_address_from_request(request: flask.Request) -> str:
+    """
+    :param request: flask request object
+    :return: IP address of client
+    """
+    return str(request.access_route[0])
 
 def raw_data_from_request(r) -> dict:
     result = {
@@ -44,9 +31,36 @@ def raw_data_from_request(r) -> dict:
             "headers": dict(r.headers),
         },
         "ip_info": get_ip_info(get_client_ip_address_from_request(r)),
-        "browser_info": user_agent_parser.Parse(str(r.user_agent)),
+        "browser_info": parse_data_from_user_agent(str(r.user_agent)),
     }
     return result
+
+
+def parse_data_from_user_agent(user_agent: str) -> dict:
+    """
+    {
+        "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:107.0) Gecko/20100101 Firefox/107.0",
+        "user_agent": {
+            "family": "Firefox",
+            "major": "107",
+            "minor": "0",
+            "patch": null
+        },
+        "os": {
+            "family": "Mac OS X",
+            "major": "10",
+            "minor": "15",
+            "patch": null,
+            "patch_minor": null
+        },
+        "device": {
+            "family": "Mac",
+            "brand": "Apple",
+            "model": "Mac"
+        }
+    }
+    """
+    return user_agent_parser.Parse(user_agent)
 
 
 def get_ip_info(ip_address):
@@ -79,12 +93,15 @@ def get_ip_info_from_geolocationdb(ip_address: str):
         request_url = f'https://geolocation-db.com/jsonp/{token}/{ip_address}'
     else:
         request_url = f'https://geolocation-db.com/jsonp/{ip_address}'
-    response = requests.get(request_url)
+    try:
+        response = requests.get(request_url)
+    except Exception as e:
+        return dict(error=str(e))
     result = response.content.decode()
     result = result.split("(")[1].strip(")")
     result = json.loads(result)
 
-    ip_info = IPInfo(
+    ip_info = dict(
         hostname=get_hostname_from_ip(ip_address),
         org=get_provider_from_ip(ip_address),
         region=result.get("state"),
@@ -95,7 +112,7 @@ def get_ip_info_from_geolocationdb(ip_address: str):
         country_name=result.get("country_name"),
     )
 
-    return dataclasses.asdict(ip_info)
+    return ip_info
 
 
 def get_provider_from_ip(ip_address: str) -> str:
@@ -111,25 +128,6 @@ def get_hostname_from_ip(ip_address: str) -> str:
         return next(iter(socket.gethostbyaddr(ip_address)), "")
     except Exception as e:
         return f"Error: {e}"
-
-
-def get_ip_info_from_ip_info(ip_address: str) -> dict:
-    """
-    :return:
-     {
-        "ip": "127.0.0.1",
-        "hostname": "1.0.0.127.ua.net",
-        "city": "Kyiv",
-        "region": "Kyiv City",
-        "country": "UA",
-        "loc": "50.4547,30.5238",
-        "org": "AS UKRAINE",
-        "postal": "01001",
-        "timezone": "Europe/Kyiv",
-        "readme": "https://ipinfo.io/missingauth"
-    }
-    """
-    pass
 
 
 def to_pretty_json(value):

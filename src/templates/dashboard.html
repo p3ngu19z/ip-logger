@@ -41,27 +41,41 @@
             <tr>
                 <th>Time</th>
                 <th>IP</th>
-                <th>Country</th>
+                <th>Location</th>
                 <th>Device</th>
                 <th>Details</th>
             </tr>
             </thead>
             <tbody>
             {% for click in clicks %}
+                {% set raw_data = click.raw_data %}
+                {% set ip_info = raw_data.get("ip_info", {}) %}
+                {% set browser_info = raw_data.get("browser_info", {}) %}
                 <tr>
                     <td>
                         <div>
                             {{ click.datetime.strftime("%H:%M:%S") }}<br>
-                            <small>{{ click.datetime.strftime("%Y-%m-%d") }}</small>
+                            <small class="text-muted">{{ click.datetime.strftime("%Y-%m-%d") }}</small>
                         </div>
                     </td>
-                    <td>{{ click.ip_address }}<br>
-                        {{ click.raw_data.get("ip_info", {}).get("org", "Not Found") }}
+                    <td>
+                        {{ click.ip_address }}<br>
+                        <small class="text-muted">{{ ip_info.get("org") or "" }}</small>
                     </td>
-                    <td>{{ click.raw_data.get("ip_info", {}).get("country_name", "Not Found") }}<br>
-                        {{ click.raw_data.get("ip_info", {}).get("city", "Not Found") }}
+                    <td>
+                        {{ ip_info.get("country_name") or "" }}<br>
+                        <small class="text-muted">{{ ip_info.get("city") or "" }}</small>
                     </td>
-                    <td>{{ click.raw_data.get("browser_info", {}).get("user_agent", {}).get("family", "Not Found") }}</td>
+                    <td>
+                        {% set browser = browser_info.get("user_agent", {}) %}
+                        {{ browser.get("family") or "" }} {{ browser.get("major") or "" }}{% if browser.get("minor") %}
+                        .{% endif %}{{ browser.get("minor") or "" }}{% if browser.get("patch") %}
+                        .{% endif %}{{ browser.get("patch") or "" }}<br>
+                        {% set os = browser_info.get("os", {}) %}
+                        {{ os.get("family") or "" }}
+                        {{ os.get("major") or "" }}{% if os.get("minor") %}.{% endif %}{{ os.get("minor") or "" }}
+                        {% if os.get("patch") %}.{% endif %}{{ os.get("patch") or "" }}
+                    </td>
                     <td>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#RawDataModal{{ click.uuid }}">
@@ -157,16 +171,5 @@
     function CopyShortURL() {
       navigator.clipboard.writeText("{{ request.host_url + url.path }}");
     }
-
-
-
-
-
-
-
-
-
-
-
     </script>
 {% endblock %}
