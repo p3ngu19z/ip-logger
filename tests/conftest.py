@@ -13,6 +13,10 @@ def app():
     db_fd, db_path = tempfile.mkstemp()
 
     app = create_app()
+    
+    with app.app_context():
+        db.create_all()
+
     app.config.update({
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": db_path,
