@@ -1,3 +1,5 @@
+import logging
+
 from flask import Blueprint, request, redirect, render_template, url_for
 from crawlerdetect import CrawlerDetect
 
@@ -10,6 +12,10 @@ from src.models import Click, URL, db
 from src.forms import URLCreateForm, URLEditForm
 from src.utils import raw_data_from_request, get_client_ip_address_from_request
 
+from src.tasks import ip_info_request
+
+logger = logging.getLogger(__name__)
+
 main = Blueprint('main', __name__, url_prefix='/')
 
 auth = HTTPBasicAuth()
@@ -18,7 +24,7 @@ users = {}
 
 
 @main.record
-def record_auth(setup_state):
+def init_auth(setup_state):
     global users
     config = setup_state.app.config
     users = {
@@ -42,10 +48,15 @@ def logger_view(path):
     if click_uuid:
         click = db.one_or_404(db.select(Click).filter_by(uuid=click_uuid))
     else:
-        click = Click(ip_address=get_client_ip_address_from_request(request), url=url_obj,
+        ip_address = get_client_ip_address_from_request(request)
+        click = Click(ip_address=ip_address, url=url_obj,
                       raw_data=raw_data_from_request(request))
         db.session.add(click)
         db.session.commit()
+
+        # Start background tasks
+        ip_info_request.delay(click.uuid)
+
 
     # Detect Bots
     crawler_detect = CrawlerDetect(headers=dict(request.headers), user_agent=str(request.user_agent))

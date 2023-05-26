@@ -24,14 +24,13 @@ def get_client_ip_address_from_request(request: flask.Request) -> str:
 
 def raw_data_from_request(r) -> dict:
     result = {
-        "request_info": {
+        "request": {
             "user_agent": str(r.user_agent),
             "referrer_url": str(r.referrer),
             "access_route": ", ".join(str(x) for x in r.access_route),
             "headers": dict(r.headers),
         },
-        "ip_info": get_ip_info(get_client_ip_address_from_request(r)),
-        "browser_info": parse_data_from_user_agent(str(r.user_agent)),
+        "user_agent_details": parse_data_from_user_agent(str(r.user_agent)),
     }
     return result
 
@@ -63,12 +62,12 @@ def parse_data_from_user_agent(user_agent: str) -> dict:
     return user_agent_parser.Parse(user_agent)
 
 
-def get_ip_info(ip_address):
+def get_ip_info(ip_address: str):
     from src.models import Click
     click_with_some_ip = Click.query.filter_by(ip_address=ip_address).first()
 
-    if click_with_some_ip:
-        return click_with_some_ip.raw_data["ip_info"]
+    if ip_details := click_with_some_ip.raw_data.get("ip_details"):
+        return ip_details
     else:
         return get_ip_info_from_geolocationdb(ip_address)
 

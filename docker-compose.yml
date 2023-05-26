@@ -5,5 +5,5 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - USERNAME=iplogger
-      - PASSWORD=1pl0gg3r
+      - IP_LOGGER_USERNAME=iplogger
+      - IP_LOGGER_PASSWORD=1pl0gg3r

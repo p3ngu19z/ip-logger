@@ -36,6 +36,7 @@
                 </form>
             </div>
         </div>
+        <hr>
         <table class="table">
             <thead>
             <tr>
@@ -49,8 +50,8 @@
             <tbody>
             {% for click in clicks %}
                 {% set raw_data = click.raw_data %}
-                {% set ip_info = raw_data.get("ip_info", {}) %}
-                {% set browser_info = raw_data.get("browser_info", {}) %}
+                {% set ip_details = raw_data.get("ip_details", {}) %}
+                {% set user_agent_details = raw_data.get("user_agent_details", {}) %}
                 <tr>
                     <td>
                         <div>
@@ -60,18 +61,18 @@
                     </td>
                     <td>
                         {{ click.ip_address }}<br>
-                        <small class="text-muted">{{ ip_info.get("org") or "" }}</small>
+                        <small class="text-muted">{{ ip_details.get("org") or "" }}</small>
                     </td>
                     <td>
-                        {{ ip_info.get("country_name") or "" }}<br>
-                        <small class="text-muted">{{ ip_info.get("city") or "" }}</small>
+                        {{ ip_details.get("country_name") or "" }}<br>
+                        <small class="text-muted">{{ ip_details.get("city") or "" }}</small>
                     </td>
                     <td>
-                        {% set browser = browser_info.get("user_agent", {}) %}
+                        {% set browser = user_agent_details.get("user_agent", {}) %}
                         {{ browser.get("family") or "" }} {{ browser.get("major") or "" }}{% if browser.get("minor") %}
                         .{% endif %}{{ browser.get("minor") or "" }}{% if browser.get("patch") %}
                         .{% endif %}{{ browser.get("patch") or "" }}<br>
-                        {% set os = browser_info.get("os", {}) %}
+                        {% set os = user_agent_details.get("os", {}) %}
                         {{ os.get("family") or "" }}
                         {{ os.get("major") or "" }}{% if os.get("minor") %}.{% endif %}{{ os.get("minor") or "" }}
                         {% if os.get("patch") %}.{% endif %}{{ os.get("patch") or "" }}
@@ -126,15 +127,15 @@
                                 <tbody>
                                 <tr>
                                     <td>User-Agent</td>
-                                    <td>{{ click.raw_data.get("request_info", {}).get("user_agent", "") }}</td>
+                                    <td>{{ click.raw_data.get("request", {}).get("user_agent", "") }}</td>
                                 </tr>
                                 <tr>
                                     <td>Hostname</td>
-                                    <td>{{ click.raw_data.get("ip_info", {}).get("hostname", "") }}</td>
+                                    <td>{{ click.raw_data.get("ip_details", {}).get("hostname", "") }}</td>
                                 </tr>
                                 <tr>
                                     <td>Referer Url</td>
-                                    <td>{{ click.raw_data.get("request_info", {}).get("referrer_url", "") }}</td>
+                                    <td>{{ click.raw_data.get("request", {}).get("referrer_url", "") }}</td>
                                 </tr>
                                 </tbody>
                             </table>

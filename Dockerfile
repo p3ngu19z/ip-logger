@@ -1,6 +1,9 @@
 # pull official base image
 FROM python:3.10.7-slim-buster
 
+# install redis
+RUN apt-get update && apt-get install -y redis-server
+
 # set work directory
 WORKDIR /app
 
@@ -14,6 +17,6 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
 # copy project
-COPY . /app
+COPY . /app 
 
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]
+CMD ["bash", "-c", "redis-server --daemonize yes && nohup celery -A make_celery worker --loglevel INFO & nohup celery -A make_celery beat --loglevel INFO & gunicorn --bind 0.0.0.0:5000 run:app"]

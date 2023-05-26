@@ -3,6 +3,7 @@ import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy_utils import URLType, IPAddressType, UUIDType
 
 from src.utils import generate_random_name
@@ -23,4 +24,4 @@ class Click(db.Model):
     datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     url_uuid = db.Column(UUIDType(), db.ForeignKey("url.uuid"))
     url = db.relationship("URL")
-    raw_data = db.Column(JSON, default=dict())
+    raw_data = db.Column(MutableDict.as_mutable(JSON), default=dict())
