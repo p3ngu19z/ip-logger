@@ -19,4 +19,4 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . /app 
 
-CMD ["bash", "-c", "redis-server --daemonize yes && nohup celery -A make_celery worker --loglevel INFO & nohup celery -A make_celery beat --loglevel INFO & gunicorn --bind 0.0.0.0:5000 run:app"]
+CMD ["bash", "-c", "redis-server --daemonize yes && nohup celery -A make_celery worker --concurrency=2 & gunicorn --bind 0.0.0.0:5000 run:app"]
