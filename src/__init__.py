@@ -3,11 +3,10 @@ from flask import Flask
 
 logger = logging.getLogger(__name__)
 
-def create_app():
+def create_app(config='src.config.Config'):
     app = Flask(__name__)
-
-    from src.config import Config
-    app.config.from_object(Config())
+    
+    app.config.from_object(config)
 
     from src.models import db
     db.init_app(app)

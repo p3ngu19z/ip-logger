@@ -10,37 +10,15 @@ EXAMPLE_URL = "https://example.com"
 
 @pytest.fixture()
 def app():
-    db_fd, db_path = tempfile.mkstemp()
-    rb_fd, rb_path = tempfile.mkstemp()
-
-    app = create_app()
-
-    app.config.update({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": db_path,
-        "WTF_CSRF_ENABLED": False,
-        "CELERY": dict(
-            broker_url="memory://",
-            result_backend=rb_path,
-            task_ignore_result=True,
-        ),
-        "CELERY_TASK_ALWAYS_EAGER": True,
-        "CELERY_TASK_EAGER_PROPAGATES": True
-    })
+    app = create_app("src.config.TestingConfig")
 
     with app.app_context():
         db.create_all()
 
     yield app
 
-    # TODO: fix droping not a testing db
     with app.app_context():
         db.drop_all()
-
-    os.close(db_fd)
-    os.unlink(db_path)
-    os.close(rb_fd)
-    os.unlink(rb_path)
 
 
 @pytest.fixture()
